@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig 
+		PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" 
+		"http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings cacheModelsEnabled="false" enhancementEnabled="true" lazyLoadingEnabled="true"
+		useStatementNamespaces="false" statementCachingEnabled="true" classInfoCacheEnabled="true" />
+	<sqlMap resource="com/suncreate/spatialquery/dao/ibatis/maps/GIS_CAMERA_POSITION_RECORD_SqlMap.xml" />
+
+</sqlMapConfig>

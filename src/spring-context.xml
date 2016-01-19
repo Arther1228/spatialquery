@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd 
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd 
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+	default-autowire="byName">
+	
+    <!-- 使用注解自动注册bean,使得@Required,@Autowired的属性被注入 -->
+	
+	<context:component-scan base-package="com.suncreate.spatialquery" />
+	
+	
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
+	<!-- (in this case, JDBC related properties) -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+	<!-- Main JNDI DataSource for J2EE environments -->
+	<!-- jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/dstdb"-->
+	<jee:jndi-lookup id="dataSource" jndi-name="${jdbc.jndiname.1}" resource-ref="true"/> 
+	
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+	<!-- Local Apache Commons DBCP DataSource that refers to a combined database -->
+	<!-- The placeholders are resolved from jdbc.properties through
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean> -->
+	
+
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
+	<!-- bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager" -->
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor"
+		lazy-init="true" />
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">   
+                <list>   
+                      <value>classpath:sqlmap-base-config.xml</value>   
+                </list>    
+       </property>
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- ========================= ASPECT CONFIGURATION ======================== -->
+	<aop:config>
+		<!--
+			This definition creates auto-proxy infrastructure based on the given pointcut, expressed in AspectJ pointcut
+			language. Here: applying the advice named "txAdvice" to all methods on classes named TdbImpl.
+		-->
+		<aop:advisor pointcut="execution(* com.suncreate..service.*Service.*(..))" advice-ref="txAdvice" />
+	</aop:config>
+	<!--
+		Transaction advice definition, based on method name patterns. Defaults to PROPAGATION_REQUIRED for all methods whose
+		name starts with "insert" or "update", and to PROPAGATION_REQUIRED with read-only hint for all other methods.
+	-->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="create*" />
+			<tx:method name="modify*" />
+			<tx:method name="remove*" />
+			<tx:method name="*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+</beans>

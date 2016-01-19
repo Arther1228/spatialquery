@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+encoding//src/com/suncreate/spatialquery/dao/ibatis/GisCameraPositionRecordDaoSqlMapImpl.java=GBK
+encoding//src/com/suncreate/spatialquery/dao/ibatis/maps/GIS_CAMERA_POSITION_RECORD_SqlMap.xml=UTF-8
+encoding//src/com/suncreate/spatialquery/domain/GisCameraPositionRecord.java=GBK
+encoding/<project>=UTF-8
+encoding/src=UTF-8
